@@ -1,6 +1,7 @@
 mod components;
 mod core;
 mod events;
+mod physics;
 mod renderer;
 mod systems;
 mod utils;
@@ -10,6 +11,9 @@ use std::time::Duration;
 
 use components::moveable_entity::MoveableEntity;
 use events::movement_event::{Direction, MovementEvent};
+use physics::components::speed::Speed;
+use physics::systems::movement_event_handler::MovementEventHandler;
+use physics::systems::movement_system::MovementSystem;
 use systems::animator::Animator;
 use systems::movement_animator::MovementAnimator;
 use crate::components::animation::Animation;
@@ -42,11 +46,10 @@ fn main() -> Result<(), String> {
     let mut dispatcher = DispatcherBuilder::new()
         .with(MovementAnimator, "Movement Animator", &[])
         .with(Animator, "Animator", &["Movement Animator"])
+        .with(MovementEventHandler, "Movement Event Handler", &[])
+        .with(MovementSystem, "Movement System", &["Movement Event Handler"])
         .build();
     dispatcher.setup(&mut world);
-
-    // TODO: remove when a dispatcher uses this
-    world.register::<Position>();
 
     let texture_creator = canvas.texture_creator();
     let textures = [
@@ -57,15 +60,18 @@ fn main() -> Result<(), String> {
     let idle_frames = divide_sheet_to_sprites(64, 256, 80, 0);
     let movement_frames = divide_sheet_to_sprites(80, 640, 80, 1);
 
+    // TODO: use the new pattern!
     world.create_entity()
         .with(Position { x: 120f32, y: 120f32 })
         .with(MoveableEntity { movement_frames, idle_frames: idle_frames.clone(), current_direction: Direction::Stop })
+        .with(Speed { x: 0f32, y: 0f32 })
         .with(idle_frames[0].clone())
         .with(Animation { frames: idle_frames, current_frame: 0, elapsed_time: 0f32 })
         .build();
 
     let mut now = timer_subsystem.performance_counter();
     let mut last_frame_time: u64;
+    let mut current_direction = Direction::Stop;
 
     'running: loop {
         let mut movement_event = None;
@@ -73,14 +79,22 @@ fn main() -> Result<(), String> {
         for event in event_pump.poll_iter() {
             match event {
                 Event::KeyDown { keycode: Some(Keycode::LEFT), .. } => {
-                    movement_event = Some(MovementEvent(Direction::Left));
+                    current_direction = Direction::Left;
+                    movement_event = Some(MovementEvent(current_direction.clone()));
                 }
                 Event::KeyDown { keycode: Some(Keycode::Right), .. } => {
-                    movement_event = Some(MovementEvent(Direction::Right));
+                    current_direction = Direction::Right;
+                    movement_event = Some(MovementEvent(current_direction.clone()));
                 }
-                Event::KeyUp { keycode: Some(Keycode::LEFT), .. } |
+                Event::KeyUp { keycode: Some(Keycode::LEFT), .. } => {
+                    if current_direction == Direction::Left {
+                        movement_event = Some(MovementEvent(Direction::Stop));
+                    }
+                }
                 Event::KeyUp { keycode: Some(Keycode::Right), .. } => {
-                    movement_event = Some(MovementEvent(Direction::Stop));
+                    if current_direction == Direction::Right {
+                        movement_event = Some(MovementEvent(Direction::Stop));
+                    }
                 }
                 Event::Quit { .. } |
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
