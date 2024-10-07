@@ -6,10 +6,11 @@ mod renderer;
 mod systems;
 mod utils;
 
-use core::{DeltaTime, Position};
+use core::delta_time::DeltaTime;
 use std::time::Duration;
 
 use components::moveable_entity::MoveableEntity;
+use components::position::Position;
 use events::movement_event::{Direction, MovementEvent};
 use physics::components::speed::Speed;
 use physics::systems::movement_event_handler::MovementEventHandler;
@@ -53,20 +54,20 @@ fn main() -> Result<(), String> {
 
     let texture_creator = canvas.texture_creator();
     let textures = [
+        texture_creator.load_texture("assets/Background/Background.png")?,
         texture_creator.load_texture("assets/Character/Idle/Idle-Sheet.png")?,
         texture_creator.load_texture("assets/Character/Run/Run-Sheet.png")?,
     ];
 
-    let idle_frames = divide_sheet_to_sprites(64, 256, 80, 0);
-    let movement_frames = divide_sheet_to_sprites(80, 640, 80, 1);
+    let idle_frames = divide_sheet_to_sprites(64, 256, 80, 1);
+    let movement_frames = divide_sheet_to_sprites(80, 640, 80, 2);
 
-    // TODO: use the new pattern!
     world.create_entity()
-        .with(Position { x: 120f32, y: 120f32 })
-        .with(MoveableEntity { movement_frames, idle_frames: idle_frames.clone(), current_direction: Direction::Stop })
-        .with(Speed { x: 0f32, y: 0f32 })
+        .with(Position::new(120f32, 500f32))
+        .with(MoveableEntity::new(movement_frames, idle_frames.clone(), Direction::Stop))
+        .with(Speed::new(0f32, 0f32))
         .with(idle_frames[0].clone())
-        .with(Animation { frames: idle_frames, current_frame: 0, elapsed_time: 0f32 })
+        .with(Animation::new(idle_frames, 0, 0f32))
         .build();
 
     let mut now = timer_subsystem.performance_counter();

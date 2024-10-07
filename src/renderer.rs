@@ -4,8 +4,8 @@ use sdl2::render::{Texture, WindowCanvas};
 use specs::prelude::*;
 use specs::ReadStorage;
 
+use crate::components::position::Position;
 use crate::components::sprite::Sprite;
-use crate::core::Position;
 
 type SystemData<'a> = (
     ReadStorage<'a, Sprite>,
@@ -19,6 +19,9 @@ pub fn render(
 ) -> Result<(), String> {
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
+
+    let (width, height) = canvas.output_size()?;
+    canvas.copy(&textures[0], Rect::new(0, 0, 480, 272), Rect::new(0, 0, width, height))?;
 
     for (sprite, position) in (&sprites, &positions).join() {
         let dst = Rect::from_center(

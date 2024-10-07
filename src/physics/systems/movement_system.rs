@@ -1,6 +1,7 @@
 use specs::prelude::*;
 
-use crate::core::{DeltaTime, Position};
+use crate::components::position::Position;
+use crate::core::delta_time::DeltaTime;
 use crate::physics::components::speed::Speed;
 
 pub struct MovementSystem;
