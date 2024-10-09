@@ -1,6 +1,6 @@
 use sdl2::rect::Rect;
 
-use crate::components::sprite::Sprite;
+use crate::core::components::sprite::Sprite;
 
 pub fn divide_sheet_to_sprites(
     sprite_width: u32,

@@ -1,7 +1,7 @@
 use specs::prelude::*;
 use specs_derive::Component;
 
-use super::sprite::Sprite;
+use crate::core::components::sprite::Sprite;
 
 #[derive(Component, Debug)]
 #[storage(VecStorage)]

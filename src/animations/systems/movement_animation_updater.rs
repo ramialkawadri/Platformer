@@ -1,16 +1,17 @@
 use specs::prelude::*;
 
-use crate::components::animation::Animation;
-use crate::components::moveable_entity::MoveableEntity;
-use crate::components::sprite::Sprite;
-use crate::events::movement_event::{Direction, MovementEvent};
+use crate::animations::components::animation::Animation;
+use crate::animations::components::movement_animations::MovementAnimations;
+use crate::core::components::sprite::Sprite;
+use crate::core::direction::Direction;
+use crate::events::movement_event::MovementEvent;
 
-pub struct MovementAnimator;
+pub struct MovementAnimationUpdater;
 
-impl<'a> System<'a> for MovementAnimator {
+impl<'a> System<'a> for MovementAnimationUpdater {
     type SystemData = (
         ReadExpect<'a, Option<MovementEvent>>,
-        WriteStorage<'a, MoveableEntity>,
+        WriteStorage<'a, MovementAnimations>,
         WriteStorage<'a, Animation>,
     );
 

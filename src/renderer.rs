@@ -4,8 +4,8 @@ use sdl2::render::{Texture, WindowCanvas};
 use specs::prelude::*;
 use specs::ReadStorage;
 
-use crate::components::position::Position;
-use crate::components::sprite::Sprite;
+use crate::core::components::position::Position;
+use crate::core::components::sprite::Sprite;
 
 type SystemData<'a> = (
     ReadStorage<'a, Sprite>,

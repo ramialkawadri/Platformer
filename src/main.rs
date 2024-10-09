@@ -1,23 +1,24 @@
-mod components;
+mod animations;
 mod core;
 mod events;
 mod physics;
 mod renderer;
-mod systems;
 mod utils;
 
 use core::delta_time::DeltaTime;
+use core::direction::Direction;
 use std::time::Duration;
 
-use components::moveable_entity::MoveableEntity;
-use components::position::Position;
-use events::movement_event::{Direction, MovementEvent};
+use animations::components::animation::Animation;
+use animations::components::movement_animations::MovementAnimations;
+use core::components::keyboard_controlled::KeyboardControlled;
+use core::components::position::Position;
+use events::movement_event::MovementEvent;
 use physics::components::speed::Speed;
 use physics::systems::movement_event_handler::MovementEventHandler;
-use physics::systems::movement_system::MovementSystem;
-use systems::animator::Animator;
-use systems::movement_animator::MovementAnimator;
-use crate::components::animation::Animation;
+use physics::systems::position_updater::PositionUpdater;
+use animations::systems::animator::Animator;
+use animations::systems::movement_animation_updater::MovementAnimationUpdater;
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag, LoadTexture};
 use sdl2::keyboard::Keycode;
@@ -34,6 +35,7 @@ fn main() -> Result<(), String> {
     let _image_context = image::init(InitFlag::PNG);
 
     let window = video_subsystem.window("Platformer", 800, 600)
+        .resizable()
         .position_centered()
         .build()
         .unwrap();
@@ -45,10 +47,10 @@ fn main() -> Result<(), String> {
     world.insert(None as Option<MovementEvent>);
 
     let mut dispatcher = DispatcherBuilder::new()
-        .with(MovementAnimator, "Movement Animator", &[])
-        .with(Animator, "Animator", &["Movement Animator"])
+        .with(MovementAnimationUpdater, "Movement Animation Updater", &[])
+        .with(Animator, "Animator", &["Movement Animation Updater"])
         .with(MovementEventHandler, "Movement Event Handler", &[])
-        .with(MovementSystem, "Movement System", &["Movement Event Handler"])
+        .with(PositionUpdater, "Position Updater", &["Movement Event Handler"])
         .build();
     dispatcher.setup(&mut world);
 
@@ -64,7 +66,8 @@ fn main() -> Result<(), String> {
 
     world.create_entity()
         .with(Position::new(120f32, 500f32))
-        .with(MoveableEntity::new(movement_frames, idle_frames.clone(), Direction::Stop))
+        .with(KeyboardControlled)
+        .with(MovementAnimations::new(movement_frames, idle_frames.clone(), Direction::Stop))
         .with(Speed::new(0f32, 0f32))
         .with(idle_frames[0].clone())
         .with(Animation::new(idle_frames, 0, 0f32))

@@ -1,12 +1,12 @@
 use specs::prelude::*;
 
-use crate::components::position::Position;
+use crate::core::components::position::Position;
 use crate::core::delta_time::DeltaTime;
 use crate::physics::components::speed::Speed;
 
-pub struct MovementSystem;
+pub struct PositionUpdater;
 
-impl<'a> System<'a> for MovementSystem {
+impl<'a> System<'a> for PositionUpdater {
     type SystemData = (
         ReadExpect<'a, DeltaTime>,
         ReadStorage<'a, Speed>,

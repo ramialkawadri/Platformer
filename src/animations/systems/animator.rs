@@ -1,7 +1,7 @@
 use specs::prelude::*;
 
-use crate::components::animation::Animation;
-use crate::components::sprite::Sprite;
+use crate::animations::components::animation::Animation;
+use crate::core::components::sprite::Sprite;
 use crate::core::delta_time::DeltaTime;
 
 pub struct Animator;
